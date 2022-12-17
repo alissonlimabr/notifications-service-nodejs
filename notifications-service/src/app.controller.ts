@@ -1,12 +1,31 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Post } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+import { randomUUID } from 'node:crypto';
+import { Body } from '@nestjs/common/decorators';
+import { CreateNotificationBody } from './create.notification-body';
 
-@Controller()
+@Controller('notifications')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-  @Get('home') // decorator para mapear a url (semelhante ao @GetMapping do Springboot)
-  getHello(): string {
-    return this.appService.getHello();
+  // inversão de dependência
+  constructor(private readonly prisma: PrismaService) {}
+  @Get() // decorator para mapear a url (semelhante ao @GetMapping do Springboot)
+  list() {
+    return this.prisma.notification.findMany(); //retorna todas as notificações
+  }
+
+  @Post()
+  async create(@Body() body: CreateNotificationBody) {
+    // decorator Body para receber o corpo da requisição. Tipagem com a classe CreateNotificationBody
+    const { recipientId, content, category } = body;
+
+    await this.prisma.notification.create({
+      data: {
+        id: randomUUID(),
+        content,
+        category,
+        recipientId,
+      },
+    });
   }
 }
 
