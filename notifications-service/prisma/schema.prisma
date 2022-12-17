@@ -1,0 +1,23 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modelagem do BD
+model Notification {
+  id          String    @id
+  recipientId String // id do usuário que possibilitará indexar os dados por recipiente
+  content     String
+  category    String
+  readAt      DateTime? //Data de leitura que pode ser nula, pois a pessoa pode não ter visualizado ainda
+  createAt    DateTime  @default(now()) //Pega o horário atual no momento que a notificação for salva no banco de dados
+
+  @@index([recipientId]) //referêcia para indexar os dados (analogia a uma chave extrangeira)
+}
